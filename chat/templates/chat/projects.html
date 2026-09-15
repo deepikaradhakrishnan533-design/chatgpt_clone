@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Projects</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .back {
+            text-decoration: none;
+            color: #333;
+        }
+
+        form.create-form {
+            margin: 25px 0;
+        }
+
+        input {
+            padding: 10px;
+            width: 60%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            background-color: #333;
+            color: white;
+        }
+
+        .project {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        .project-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .chat {
+            padding: 10px 12px;
+            margin: 6px 0;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+        }
+
+        .chat a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .new-chat {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        .upload-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .upload-section input {
+            width: auto;
+        }
+
+        .upload-button {
+            margin-top: 10px;
+        }
+
+        .delete {
+            display: inline-block;
+            margin-top: 12px;
+            color: red;
+            text-decoration: none;
+        }
+
+        .no-chats {
+            color: #777;
+        }
+
+        hr {
+            margin: 25px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📁 My Projects</h1>
+
+    <a class="back" href="{% url 'chat_home' %}">
+        ← Back to Chat
+    </a>
+
+    <hr>
+
+    <h2>Create New Project</h2>
+
+    <form method="post" class="create-form">
+        {% csrf_token %}
+
+        <input
+            type="text"
+            name="name"
+            placeholder="Enter project name"
+            required
+        >
+
+        <button type="submit">
+            Create Project
+        </button>
+    </form>
+
+    <hr>
+
+    <h2>Your Projects</h2>
+
+    {% if projects %}
+
+        {% for project in projects %}
+
+            <div class="project">
+
+                <div class="project-name">
+                    📁 {{ project.name }}
+                </div>
+
+                <p>
+                    Created:
+                    {{ project.created_at }}
+                </p>
+
+                <h3>💬 Chats</h3>
+
+                {% for conversation in project.conversations.all %}
+
+                    <div class="chat">
+                        <a href="{% url 'open_chat' conversation.id %}">
+                            💬 {{ conversation.title }}
+                        </a>
+                    </div>
+
+                {% empty %}
+
+                    <p class="no-chats">
+                        No chats in this project yet.
+                    </p>
+
+                {% endfor %}
+
+                <a
+                    class="new-chat"
+                    href="{% url 'new_chat' %}?project={{ project.id }}"
+                >
+                    + New Chat
+                </a>
+
+                <div class="upload-section">
+
+                    <h3>📄 Upload Project Document</h3>
+
+                    <form
+                        method="post"
+                        enctype="multipart/form-data"
+                        action="{% url 'upload_project_document' project.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="file"
+                            name="document"
+                            accept=".pdf,.docx,.txt"
+                            required
+                        >
+
+                        <br>
+
+                        <button
+                            type="submit"
+                            class="upload-button"
+                        >
+                            Upload Document
+                        </button>
+
+                    </form>
+
+                </div>
+
+                <a
+                    class="delete"
+                    href="{% url 'delete_project' project.id %}"
+                >
+                    🗑️ Delete Project
+                </a>
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No projects created yet.</p>
+
+    {% endif %}
+
+</body>
+</html>

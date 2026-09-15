@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Library</title>
+</head>
+<body>
+
+    <h1>📚 My Document Library</h1>
+
+    <a href="{% url 'chat_home' %}">← Back to Chat</a>
+
+    <hr>
+
+    <h2>Upload Document</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <input type="file" name="document" accept=".pdf,.docx,.txt" required>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <hr>
+
+    <h2>My Documents</h2>
+
+    {% if documents %}
+
+        {% for document in documents %}
+
+            <div>
+                <p>📄 {{ document.file.name }}</p>
+                <p>Uploaded: {{ document.uploaded_at }}</p>
+                <a href="{% url 'delete_document' document.id %}">
+    🗑️ Delete
+</a>
+
+            </div>
+
+            <hr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No documents uploaded yet.</p>
+
+    {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>ChatGPT Clone</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #222;
+        }
+
+        body {
+            transition: 0.3s;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #202123;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .sidebar h3 {
+            margin-top: 25px;
+            margin-bottom: 12px;
+        }
+
+        .new-chat {
+            display: block;
+            background: #10a37f;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chat-item {
+            background: #343541;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .chat-item > a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .chat-actions {
+            margin-top: 8px;
+        }
+
+        .chat-actions a {
+            font-size: 12px;
+            margin-right: 8px;
+            text-decoration: none;
+        }
+
+        .delete {
+            color: #ff6b6b !important;
+        }
+
+        .rename {
+            color: #ffd166 !important;
+        }
+
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        .header {
+            flex-shrink: 0;
+            min-height: 60px;
+            padding: 10px 20px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-button {
+            padding: 9px 13px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #eeeeee;
+        }
+
+        .logout-button {
+            background: #e74c3c;
+            color: white;
+            padding: 9px 13px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+
+        /* =========================
+           CHAT AREA
+        ========================= */
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 40px;
+        }
+
+        .message {
+            width: 100%;
+            margin-bottom: 18px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .message-content {
+            white-space: pre-wrap;
+        }
+
+        .message strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+
+        /* =========================
+           USER MESSAGE - RIGHT
+        ========================= */
+
+        .user-message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            width: 100%;
+            margin: 0 0 18px 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .user-message strong {
+            display: none;
+        }
+
+        .user-message .message-content {
+            display: inline-block;
+            width: fit-content;
+            max-width: 55%;
+            background: #d1f5e8;
+            color: #222;
+            padding: 8px 12px;
+            border-radius: 16px;
+            text-align: left;
+            word-break: break-word;
+        }
+
+
+        /* =========================
+           AI MESSAGE - LEFT
+        ========================= */
+
+        .assistant-message {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            margin: 0 0 18px 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .assistant-message strong {
+            color: #555;
+        }
+
+        .assistant-message .message-content {
+            display: block;
+            width: fit-content;
+            max-width: 75%;
+            background: transparent;
+            padding: 0;
+            text-align: left;
+        }
+
+
+        /* =========================
+           LISTEN BUTTON
+        ========================= */
+
+        .speak-button {
+            margin-top: 7px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            background: #eeeeee;
+            color: #333;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .speak-button:hover {
+            background: #dddddd;
+        }
+
+        .speak-button.playing {
+            background: #d1f5e8;
+            color: #0b8065;
+        }
+
+
+        /* =========================
+           IMAGE PREVIEW
+        ========================= */
+
+        .image-preview {
+            display: none;
+            flex-shrink: 0;
+            padding: 8px 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .image-preview span {
+            font-size: 14px;
+            color: #555;
+        }
+
+
+        /* =========================
+           DOCUMENT UPLOAD
+        ========================= */
+
+        .upload-section {
+            flex-shrink: 0;
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .upload-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .upload-form input[type="file"] {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .upload-button {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+
+        /* =========================
+           MESSAGE FORM
+        ========================= */
+
+        .message-form {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .message-form input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            height: 46px;
+            padding: 0 16px;
+            border: 1px solid #ccc;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .message-form input[type="text"]:focus {
+            border-color: #10a37f;
+        }
+
+        .message-form button {
+            margin-left: 8px;
+            width: 46px;
+            height: 46px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .camera-button,
+        .voice-button {
+            background: #eeeeee;
+        }
+
+        .camera-button:hover,
+        .voice-button:hover {
+            background: #dddddd;
+        }
+
+        .voice-button.listening {
+            background: #ffcccc;
+        }
+
+        .send-button {
+            background: #10a37f;
+            color: white;
+        }
+
+        .send-button:hover {
+            background: #0e8f70;
+        }
+
+
+        /* =========================
+           DARK MODE
+        ========================= */
+
+        body.dark-mode {
+            background: #343541;
+            color: white;
+        }
+
+        body.dark-mode .header {
+            background: #202123;
+            border-bottom: 1px solid #444;
+        }
+
+        body.dark-mode .assistant-message {
+            background: transparent;
+            color: white;
+        }
+
+        body.dark-mode .user-message {
+            background: transparent;
+        }
+
+        body.dark-mode .user-message .message-content {
+            background: #245448;
+            color: white;
+        }
+
+        body.dark-mode .assistant-message strong {
+            color: #ccc;
+        }
+
+        body.dark-mode .upload-section {
+            background: #202123;
+            border-top: 1px solid #444;
+        }
+
+        body.dark-mode .image-preview {
+            background: #202123;
+            border-top: 1px solid #444;
+        }
+
+        body.dark-mode .image-preview span {
+            color: #ddd;
+        }
+
+        body.dark-mode .message-form {
+            background: #202123;
+            border-top: 1px solid #444;
+        }
+
+        body.dark-mode .message-form input[type="text"] {
+            background: #40414f;
+            color: white;
+            border: 1px solid #666;
+        }
+
+        body.dark-mode .theme-button {
+            background: #f1c40f;
+            color: #222;
+        }
+
+        body.dark-mode .camera-button,
+        body.dark-mode .voice-button,
+        body.dark-mode .speak-button {
+            background: #40414f;
+            color: white;
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                width: 210px;
+                padding: 15px;
+            }
+
+            .header {
+                padding: 12px 15px;
+            }
+
+            .header h2 {
+                font-size: 18px;
+            }
+
+            .messages {
+                padding: 15px 20px;
+            }
+
+            .user-message .message-content {
+                max-width: 80%;
+            }
+
+            .assistant-message .message-content {
+                max-width: 85%;
+            }
+
+            .upload-section {
+                padding: 8px 12px;
+            }
+
+            .upload-form {
+                flex-wrap: wrap;
+            }
+
+            .upload-button {
+                width: 100%;
+            }
+
+            .message-form {
+                padding: 8px 10px;
+            }
+
+            .message-form input[type="text"] {
+                height: 44px;
+            }
+
+            .message-form button {
+                width: 44px;
+                height: 44px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body id="page-body">
+
+
+<div class="container">
+
+
+    <!-- SIDEBAR -->
+
+    <div class="sidebar">
+
+        <h2>ChatGPT Clone</h2>
+
+        <a
+            href="{% url 'new_chat' %}"
+            class="new-chat"
+        >
+            + New Chat
+        </a>
+
+        <h3>Chat History</h3>
+
+        {% for chat in conversations %}
+
+            <div class="chat-item">
+
+                <a href="{% url 'open_chat' chat.id %}">
+                    {{ chat.title }}
+                </a>
+
+                <div class="chat-actions">
+
+                    <a href="{% url 'open_chat' chat.id %}">
+                        Open
+                    </a>
+
+                    <a
+                        href="{% url 'rename_chat' chat.id %}"
+                        class="rename"
+                        onclick="renameChat(event, '{{ chat.id }}')"
+                    >
+                        ✏️ Rename
+                    </a>
+
+                    <a
+                        href="{% url 'delete_chat' chat.id %}"
+                        class="delete"
+                        onclick="return confirm('Delete this chat?')"
+                    >
+                        🗑️ Delete
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% empty %}
+
+            <p>No chats yet.</p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- MAIN -->
+
+    <div class="main">
+
+
+        <!-- HEADER -->
+
+        <div class="header">
+
+            <h2>
+                {{ conversation.title }}
+            </h2>
+
+            <div class="header-actions">
+
+                <button
+                    class="theme-button"
+                    onclick="toggleTheme()"
+                    id="theme-button"
+                >
+                    🌙 Dark Mode
+                </button>
+
+                <a
+                    href="{% url 'logout' %}"
+                    class="logout-button"
+                >
+                    Logout
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- MESSAGES -->
+
+        <div class="messages">
+
+            {% for message in messages %}
+
+                <div
+                    class="
+                        message
+                        {% if message.sender == 'user' %}
+                            user-message
+                        {% else %}
+                            assistant-message
+                        {% endif %}
+                    "
+                >
+
+                    <strong>
+                        {% if message.sender == "user" %}
+                            You
+                        {% else %}
+                            AI
+                        {% endif %}
+                    </strong>
+
+                    <div class="message-content">
+                        {{ message.content }}
+                    </div>
+
+                    {% if message.sender == "assistant" %}
+
+                        <button
+                            type="button"
+                            class="speak-button"
+                        >
+                            🔊 Listen
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            {% empty %}
+
+                <p>Start a new conversation.</p>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- IMAGE PREVIEW -->
+
+        <div
+            class="image-preview"
+            id="image-preview"
+        >
+
+            <span id="image-name">
+                Image selected
+            </span>
+
+        </div>
+
+
+        <!-- DOCUMENT UPLOAD -->
+
+        <div class="upload-section">
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+                class="upload-form"
+            >
+
+                {% csrf_token %}
+
+                <input
+                    type="file"
+                    name="document"
+                    accept=".pdf,.txt,.docx"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    class="upload-button"
+                >
+                    📄 Upload Document
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- MESSAGE FORM -->
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            class="message-form"
+            id="message-form"
+        >
+
+            {% csrf_token %}
+
+            <button
+                type="button"
+                class="camera-button"
+                onclick="openCamera()"
+                title="Take a photo"
+            >
+                📷
+            </button>
+
+            <button
+                type="button"
+                class="voice-button"
+                onclick="startVoiceInput()"
+                title="Voice input"
+                id="voice-button"
+            >
+                🎤
+            </button>
+
+            <input
+                type="file"
+                name="image"
+                id="image-input"
+                accept="image/*"
+                capture="environment"
+                hidden
+            >
+
+            <input
+                type="text"
+                name="message"
+                id="message-input"
+                placeholder="Message ChatGPT..."
+            >
+
+            <button
+                type="submit"
+                class="send-button"
+            >
+                ➤
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+function toggleTheme() {
+
+    const body =
+        document.getElementById("page-body");
+
+    const button =
+        document.getElementById("theme-button");
+
+    body.classList.toggle("dark-mode");
+
+    if (
+        body.classList.contains("dark-mode")
+    ) {
+
+        button.innerHTML =
+            "☀️ Light Mode";
+
+    } else {
+
+        button.innerHTML =
+            "🌙 Dark Mode";
+    }
+}
+
+
+/* =========================
+   RENAME CHAT
+========================= */
+
+function renameChat(event, chatId) {
+
+    event.preventDefault();
+
+    const newTitle =
+        prompt("Enter new chat name:");
+
+    if (!newTitle) {
+        return;
+    }
+
+    const form =
+        document.createElement("form");
+
+    form.method = "POST";
+
+    form.action =
+        "/rename-chat/" + chatId + "/";
+
+    const csrf =
+        document.createElement("input");
+
+    csrf.type = "hidden";
+    csrf.name = "csrfmiddlewaretoken";
+    csrf.value = "{{ csrf_token }}";
+
+    const title =
+        document.createElement("input");
+
+    title.type = "hidden";
+    title.name = "title";
+    title.value = newTitle;
+
+    form.appendChild(csrf);
+    form.appendChild(title);
+
+    document.body.appendChild(form);
+
+    form.submit();
+}
+
+
+/* =========================
+   CAMERA
+========================= */
+
+function openCamera() {
+
+    document
+        .getElementById("image-input")
+        .click();
+}
+
+
+/* =========================
+   IMAGE SELECTED
+========================= */
+
+document
+    .getElementById("image-input")
+    .addEventListener(
+        "change",
+        function () {
+
+            if (this.files.length === 0) {
+                return;
+            }
+
+            document
+                .getElementById("image-preview")
+                .style.display = "block";
+
+            document
+                .getElementById("image-name")
+                .textContent =
+                    "📷 " + this.files[0].name;
+
+            document
+                .getElementById("message-input")
+                .value =
+                    "Please analyze this image.";
+        }
+    );
+
+
+/* =========================
+   VOICE INPUT
+========================= */
+
+function startVoiceInput() {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+
+        alert(
+            "Voice input is not supported in this browser."
+        );
+
+        return;
+    }
+
+    const recognition =
+        new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    const voiceButton =
+        document.getElementById("voice-button");
+
+    voiceButton.classList.add("listening");
+    voiceButton.innerHTML = "🔴";
+
+    recognition.start();
+
+    recognition.onresult =
+        function (event) {
+
+            const transcript =
+                event.results[0][0].transcript;
+
+            document
+                .getElementById("message-input")
+                .value = transcript;
+        };
+
+    recognition.onerror =
+        function () {
+
+            alert(
+                "Could not capture your voice."
+            );
+        };
+
+    recognition.onend =
+        function () {
+
+            voiceButton.classList.remove(
+                "listening"
+            );
+
+            voiceButton.innerHTML = "🎤";
+        };
+}
+
+
+/* =========================
+   AI VOICE RESPONSE
+========================= */
+
+function speakAIResponse(button) {
+
+    if (!("speechSynthesis" in window)) {
+
+        alert(
+            "Voice playback is not supported in this browser."
+        );
+
+        return;
+    }
+
+    const assistantMessage =
+        button.closest(".assistant-message");
+
+    if (!assistantMessage) {
+
+        alert("AI message not found.");
+
+        return;
+    }
+
+    const content =
+        assistantMessage.querySelector(
+            ".message-content"
+        );
+
+    if (!content) {
+
+        alert("AI response text not found.");
+
+        return;
+    }
+
+    const text =
+        content.textContent.trim();
+
+    if (!text) {
+
+        alert("There is no AI text to read.");
+
+        return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance =
+        new SpeechSynthesisUtterance(text);
+
+    utterance.lang = "en-IN";
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    const voices =
+        window.speechSynthesis.getVoices();
+
+    const preferredVoice =
+        voices.find(
+            function (voice) {
+                return voice.lang === "en-IN";
+            }
+        ) ||
+        voices.find(
+            function (voice) {
+                return voice.lang.startsWith("en");
+            }
+        );
+
+    if (preferredVoice) {
+        utterance.voice = preferredVoice;
+    }
+
+    button.classList.add("playing");
+    button.textContent = "⏹ Stop";
+
+    let stopped = false;
+
+    button.onclick = function () {
+
+        stopped = true;
+
+        window.speechSynthesis.cancel();
+
+        button.classList.remove("playing");
+        button.textContent = "🔊 Listen";
+
+        button.onclick = function () {
+            speakAIResponse(button);
+        };
+    };
+
+    utterance.onend =
+        function () {
+
+            if (!stopped) {
+
+                button.classList.remove(
+                    "playing"
+                );
+
+                button.textContent =
+                    "🔊 Listen";
+
+                button.onclick = function () {
+                    speakAIResponse(button);
+                };
+            }
+        };
+
+    utterance.onerror =
+        function () {
+
+            button.classList.remove(
+                "playing"
+            );
+
+            button.textContent =
+                "🔊 Listen";
+
+            button.onclick = function () {
+                speakAIResponse(button);
+            };
+
+            alert(
+                "The browser could not play the AI response."
+            );
+        };
+
+    window.speechSynthesis.speak(
+        utterance
+    );
+}
+
+
+/* =========================
+   CONNECT LISTEN BUTTONS
+========================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const buttons =
+            document.querySelectorAll(
+                ".speak-button"
+            );
+
+        buttons.forEach(
+            function (button) {
+
+                button.onclick =
+                    function () {
+
+                        speakAIResponse(
+                            button
+                        );
+                    };
+            }
+        );
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

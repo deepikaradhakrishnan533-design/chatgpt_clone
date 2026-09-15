@@ -1,22 +1,94 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+
+from chat import views
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(
+        "admin/",
+        admin.site.urls
+    ),
+
+    # Authentication
+    path(
+        "signup/",
+        views.signup,
+        name="signup"
+    ),
+    path(
+        "login/",
+        views.login_view,
+        name="login"
+    ),
+    path(
+        "logout/",
+        views.logout_view,
+        name="logout"
+    ),
+
+    # Chat
+    path(
+        "",
+        views.chat_home,
+        name="chat_home"
+    ),
+    path(
+        "new-chat/",
+        views.new_chat,
+        name="new_chat"
+    ),
+    path(
+        "chat/<int:conversation_id>/",
+        views.open_chat,
+        name="open_chat"
+    ),
+    path(
+        "delete-chat/<int:conversation_id>/",
+        views.delete_chat,
+        name="delete_chat"
+    ),
+    path(
+        "rename-chat/<int:conversation_id>/",
+        views.rename_chat,
+        name="rename_chat"
+    ),
+
+    # Document Library
+    path(
+        "library/",
+        views.library,
+        name="library"
+    ),
+    path(
+        "delete-document/<int:document_id>/",
+        views.delete_document,
+        name="delete_document"
+    ),
+
+    # Projects
+    path(
+        "projects/",
+        views.projects,
+        name="projects"
+    ),
+    path(
+        "delete-project/<int:project_id>/",
+        views.delete_project,
+        name="delete_project"
+    ),
+    path(
+    "project/<int:project_id>/upload-document/",
+    views.upload_project_document,
+    name="upload_project_document"
+),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )
