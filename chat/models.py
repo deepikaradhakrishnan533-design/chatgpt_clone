@@ -1,8 +1,12 @@
-from django.db import models
+"""Database models for the chat application."""
+
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class Project(models.Model):
+    """Store a user's project."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -15,10 +19,13 @@ class Project(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        """Return the project name."""
+        return str(self.name)
 
 
 class Conversation(models.Model):
+    """Store a chat conversation."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -39,10 +46,13 @@ class Conversation(models.Model):
     )
 
     def __str__(self):
-        return self.title
+        """Return the conversation title."""
+        return str(self.title)
 
 
 class Message(models.Model):
+    """Store a message in a conversation."""
+
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
@@ -57,10 +67,13 @@ class Message(models.Model):
     )
 
     def __str__(self):
-        return f"{self.sender}: {self.content[:30]}"
+        """Return a short representation of the message."""
+        return f"{self.sender}: {self.content[:30]}"  # pylint: disable=unsubscriptable-object
 
 
 class Document(models.Model):
+    """Store a document uploaded by a user."""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
@@ -80,4 +93,5 @@ class Document(models.Model):
     )
 
     def __str__(self):
-        return self.file.name
+        """Return the document file name."""
+        return str(self.file.name)

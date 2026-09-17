@@ -1,3 +1,5 @@
+"""Retrieval-augmented generation utilities for the chat application."""
+
 from pathlib import Path
 import re
 
@@ -21,9 +23,7 @@ chroma_client = chromadb.PersistentClient(
 
 
 def get_collection():
-    """
-    Get the current ChromaDB collection.
-    """
+    """Get the current ChromaDB collection."""
     return chroma_client.get_or_create_collection(
         name="documents"
     )
@@ -64,7 +64,7 @@ def split_into_sections(text):
     text = text.replace("\ufb04", "ffl")
 
     # Add a newline before headings that were accidentally
-    # joined to the previous text, such as "PowerPointProjects".
+    # joined to the previous text.
     for heading in headings:
         text = re.sub(
             rf"(?<!\n)({re.escape(heading)})",
@@ -110,14 +110,16 @@ def split_into_sections(text):
 
     return sections
 
+
 def process_pdf(file_path, document_id, user_id):
     """
     Read a PDF, split it into sections,
     create local embeddings, and store them in ChromaDB.
     """
+    # pylint: disable=too-many-locals
 
     # Always get the current collection.
-    collection = get_collection()
+    current_collection = get_collection()
 
     reader = PdfReader(file_path)
 
@@ -133,7 +135,7 @@ def process_pdf(file_path, document_id, user_id):
 
     # Remove previously stored sections
     # for this document.
-    collection.delete(
+    current_collection.delete(
         where={
             "document_id": str(document_id)
         }
@@ -151,7 +153,7 @@ def process_pdf(file_path, document_id, user_id):
     ]
 
     # Store sections in ChromaDB.
-    collection.add(
+    current_collection.add(
         ids=ids,
         documents=sections,
         embeddings=embeddings,
@@ -181,7 +183,7 @@ def search_documents(
     """
 
     # Always get the current collection.
-    collection = get_collection()
+    current_collection = get_collection()
 
     question_lower = question.lower()
 
@@ -220,7 +222,7 @@ def search_documents(
             break
 
     # Get documents belonging to this user.
-    user_documents = collection.get(
+    user_documents = current_collection.get(
         where={
             "user_id": str(user_id)
         }
@@ -260,7 +262,7 @@ def search_documents(
         question
     ).tolist()
 
-    results = collection.query(
+    results = current_collection.query(
         query_embeddings=[query_embedding],
         n_results=number_of_results,
         where={
