@@ -122,7 +122,7 @@ threadpoolctl==3.6.0
 tiktoken==0.14.0
 tokenizers==0.23.2
 tomlkit==0.15.1
-torch==2.14.0
+torch
 tqdm==4.70.1
 transformers==5.17.0
 truststore==0.10.4
