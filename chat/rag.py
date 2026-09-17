@@ -5,18 +5,13 @@ import re
 
 import chromadb
 from pypdf import PdfReader
-from sentence_transformers import SentenceTransformer
 
 
-# Local embedding model
-embedding_model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
-)
+# Base project directory
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Chroma database
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 chroma_client = chromadb.PersistentClient(
     path=str(BASE_DIR / "chroma_db")
 )
@@ -29,7 +24,11 @@ def get_collection():
     )
 
 
-collection = get_collection()
+def get_embedding_model():
+    """Load the embedding model only when it is needed."""
+    from sentence_transformers import SentenceTransformer
+
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def split_into_sections(text):
@@ -63,8 +62,8 @@ def split_into_sections(text):
     text = text.replace("\ufb03", "ffi")
     text = text.replace("\ufb04", "ffl")
 
-    # Add a newline before headings that were accidentally
-    # joined to the previous text.
+    # Add a newline before headings accidentally joined
+    # to the previous text.
     for heading in headings:
         text = re.sub(
             rf"(?<!\n)({re.escape(heading)})",
@@ -77,7 +76,6 @@ def split_into_sections(text):
     current_section = ""
 
     for line in text.splitlines():
-
         line = line.strip()
 
         if not line:
@@ -91,7 +89,6 @@ def split_into_sections(text):
                 break
 
         if matched_heading:
-
             if current_section:
                 sections.append(
                     current_section.strip()
@@ -100,7 +97,6 @@ def split_into_sections(text):
             current_section = matched_heading
 
         else:
-
             current_section += "\n" + line
 
     if current_section:
@@ -113,12 +109,11 @@ def split_into_sections(text):
 
 def process_pdf(file_path, document_id, user_id):
     """
-    Read a PDF, split it into sections,
-    create local embeddings, and store them in ChromaDB.
+    Read a PDF, split it into sections, create embeddings,
+    and store them in ChromaDB.
     """
     # pylint: disable=too-many-locals
 
-    # Always get the current collection.
     current_collection = get_collection()
 
     reader = PdfReader(file_path)
@@ -133,26 +128,25 @@ def process_pdf(file_path, document_id, user_id):
     if not sections:
         return 0
 
-    # Remove previously stored sections
-    # for this document.
+    # Remove previously stored sections for this document.
     current_collection.delete(
         where={
             "document_id": str(document_id)
         }
     )
 
-    # Create local embeddings.
+    # Load the model only when document processing is needed.
+    embedding_model = get_embedding_model()
+
     embeddings = embedding_model.encode(
         sections
     ).tolist()
 
-    # Create unique IDs.
     ids = [
         f"{document_id}_{index}"
         for index in range(len(sections))
     ]
 
-    # Store sections in ChromaDB.
     current_collection.add(
         ids=ids,
         documents=sections,
@@ -172,17 +166,15 @@ def process_pdf(file_path, document_id, user_id):
 def search_documents(
     question,
     user_id,
-    number_of_results=3
+    number_of_results=3,
 ):
     """
     Search the user's documents.
 
-    If the question contains a known CV section
-    keyword, return that section directly.
-    Otherwise, use semantic search.
+    If the question contains a known CV section keyword,
+    return that section directly. Otherwise, use semantic search.
     """
 
-    # Always get the current collection.
     current_collection = get_collection()
 
     question_lower = question.lower()
@@ -190,25 +182,19 @@ def search_documents(
     section_keywords = {
         "skills": "Skills",
         "skill": "Skills",
-
         "education": "Education",
         "study": "Education",
         "degree": "Education",
         "qualification": "Education",
-
         "experience": "Professional Experience",
         "professional experience": "Professional Experience",
         "work": "Professional Experience",
         "job": "Professional Experience",
-
         "project": "Projects",
         "projects": "Projects",
-
         "certification": "Certifications",
         "certifications": "Certifications",
-
         "specialization": "Area Of Specialization",
-
         "language": "Languages",
         "languages": "Languages",
     }
@@ -216,7 +202,6 @@ def search_documents(
     target_section = None
 
     for keyword, section in section_keywords.items():
-
         if keyword in question_lower:
             target_section = section
             break
@@ -230,14 +215,12 @@ def search_documents(
 
     documents = user_documents["documents"]
 
-    # If the question clearly asks about a
-    # particular CV section, return that section.
+    # If the question clearly asks about a particular
+    # CV section, return that section directly.
     if target_section:
-
         matching_sections = []
 
         for document in documents:
-
             first_line = (
                 document.split("\n")[0].strip()
             )
@@ -257,7 +240,9 @@ def search_documents(
     if not documents:
         return []
 
-    # Otherwise use semantic search.
+    # Load the model only for semantic search.
+    embedding_model = get_embedding_model()
+
     query_embedding = embedding_model.encode(
         question
     ).tolist()
@@ -267,7 +252,7 @@ def search_documents(
         n_results=number_of_results,
         where={
             "user_id": str(user_id)
-        }
+        },
     )
 
     return results["documents"][0]
@@ -276,21 +261,17 @@ def search_documents(
 def get_document_context(
     question,
     user_id,
-    number_of_results=3
+    number_of_results=3,
 ):
-    """
-    Get relevant information from the user's
-    uploaded documents.
-    """
+    """Get relevant information from uploaded documents."""
 
     results = search_documents(
         question,
         user_id,
-        number_of_results
+        number_of_results,
     )
 
     if not results:
-
         return (
             "No relevant information was found "
             "in the uploaded documents."
