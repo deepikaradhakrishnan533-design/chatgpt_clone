@@ -24,6 +24,11 @@ def get_collection():
     )
 
 
+# This is required by views.py.
+# It does not load the large AI embedding model.
+collection = get_collection()
+
+
 def get_embedding_model():
     """Load the embedding model only when it is needed."""
     from sentence_transformers import SentenceTransformer
