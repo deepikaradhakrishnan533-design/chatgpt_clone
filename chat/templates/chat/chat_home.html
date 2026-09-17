@@ -180,9 +180,7 @@
         }
 
 
-        /* =========================
-           USER MESSAGE - RIGHT
-        ========================= */
+        /* USER = RIGHT */
 
         .user-message {
             display: flex;
@@ -211,9 +209,7 @@
         }
 
 
-        /* =========================
-           AI MESSAGE - LEFT
-        ========================= */
+        /* AI = LEFT */
 
         .assistant-message {
             display: flex;
@@ -261,6 +257,53 @@
         .speak-button.playing {
             background: #d1f5e8;
             color: #0b8065;
+        }
+
+
+        /* =========================
+           IMAGE SEARCH
+        ========================= */
+
+        .image-search-button {
+            background: #eeeeee;
+        }
+
+        .image-search-button:hover {
+            background: #dddddd;
+        }
+
+        .image-results {
+            display: none;
+            flex-shrink: 0;
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .image-results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .image-card {
+            font-size: 11px;
+            color: #555;
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+            background: #eee;
+        }
+
+        .image-card a {
+            color: #555;
         }
 
 
@@ -423,6 +466,19 @@
             color: #ddd;
         }
 
+        body.dark-mode .image-results {
+            background: #202123;
+            border-top: 1px solid #444;
+        }
+
+        body.dark-mode .image-card {
+            color: #ddd;
+        }
+
+        body.dark-mode .image-card a {
+            color: #ddd;
+        }
+
         body.dark-mode .message-form {
             background: #202123;
             border-top: 1px solid #444;
@@ -441,7 +497,8 @@
 
         body.dark-mode .camera-button,
         body.dark-mode .voice-button,
-        body.dark-mode .speak-button {
+        body.dark-mode .speak-button,
+        body.dark-mode .image-search-button {
             background: #40414f;
             color: white;
         }
@@ -478,6 +535,14 @@
                 max-width: 85%;
             }
 
+            .image-results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .image-card img {
+                height: 100px;
+            }
+
             .upload-section {
                 padding: 8px 12px;
             }
@@ -503,6 +568,264 @@
                 height: 44px;
             }
 
+        }
+
+    
+        /* =========================
+           CHATGPT-STYLE COMPOSER
+        ========================= */
+
+        .composer-wrap {
+            position: relative;
+            flex-shrink: 0;
+            padding: 12px 20px 18px;
+            background: white;
+        }
+
+        .message-form {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px 6px 10px;
+            background: white;
+            border: 1px solid #d9d9d9;
+            border-radius: 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .message-form input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            height: 44px;
+            padding: 0 8px;
+            border: none;
+            border-radius: 22px;
+            font-size: 15px;
+            outline: none;
+            background: transparent;
+        }
+
+        .message-form input[type="text"]:focus {
+            border: none;
+        }
+
+        .message-form button {
+            margin-left: 0;
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .plus-button {
+            background: #eeeeee;
+            color: #222;
+            font-size: 25px !important;
+            font-weight: 400;
+        }
+
+        .plus-button:hover {
+            background: #dddddd;
+        }
+
+        .send-button {
+            background: #10a37f;
+            color: white;
+        }
+
+        .send-button:hover {
+            background: #0e8f70;
+        }
+
+        .composer-menu {
+            display: none;
+            position: absolute;
+            left: 20px;
+            bottom: 76px;
+            width: 230px;
+            padding: 8px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+            z-index: 1000;
+        }
+
+        .composer-menu.show {
+            display: block;
+        }
+
+        .composer-menu button {
+            width: 100%;
+            height: auto;
+            padding: 11px 12px;
+            margin: 0;
+            border-radius: 9px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #222;
+        }
+
+        .composer-menu button:hover {
+            background: #f1f1f1;
+        }
+
+        .hidden-document-upload {
+            display: none;
+        }
+
+        .image-search-button,
+        .camera-button,
+        .voice-button {
+            display: none !important;
+        }
+
+        /* ChatGPT-like sidebar */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: #f7f7f8;
+            color: #222;
+            padding: 20px 14px;
+            overflow-y: auto;
+            border-right: 1px solid #e5e5e5;
+        }
+
+        .sidebar h2 {
+            color: #222;
+            margin: 0 8px 22px;
+        }
+
+        .new-chat {
+            background: transparent;
+            color: #222;
+            border: 1px solid #d9d9d9;
+            padding: 11px 14px;
+            border-radius: 10px;
+            text-align: left;
+            margin: 0 0 20px;
+        }
+
+        .new-chat:hover {
+            background: #ececec;
+        }
+
+        .chat-item {
+            background: transparent;
+            color: #222;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 9px;
+        }
+
+        .chat-item:hover {
+            background: #ececec;
+        }
+
+        .chat-item > a {
+            color: #222;
+        }
+
+        .chat-actions a {
+            color: #555;
+        }
+
+        .composer-wrap.dark-placeholder {}
+
+        body.dark-mode .composer-wrap {
+            background: #202123;
+        }
+
+        body.dark-mode .message-form {
+            background: #40414f;
+            border-color: #666;
+        }
+
+        body.dark-mode .message-form input[type="text"] {
+            background: transparent;
+            color: white;
+            border: none;
+        }
+
+        body.dark-mode .plus-button {
+            background: #565869;
+            color: white;
+        }
+
+        body.dark-mode .plus-button:hover {
+            background: #666879;
+        }
+
+        body.dark-mode .composer-menu {
+            background: #2b2c34;
+            border-color: #555;
+        }
+
+        body.dark-mode .composer-menu button {
+            color: white;
+        }
+
+        body.dark-mode .composer-menu button:hover {
+            background: #40414f;
+        }
+
+        body.dark-mode .sidebar {
+            background: #202123;
+            color: white;
+            border-right-color: #444;
+        }
+
+        body.dark-mode .sidebar h2,
+        body.dark-mode .chat-item > a {
+            color: white;
+        }
+
+        body.dark-mode .new-chat,
+        body.dark-mode .chat-item {
+            color: white;
+            border-color: #444;
+        }
+
+        body.dark-mode .new-chat:hover,
+        body.dark-mode .chat-item:hover {
+            background: #343541;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 220px;
+                padding: 15px 10px;
+            }
+
+            .composer-wrap {
+                padding: 8px 10px 12px;
+            }
+
+            .composer-menu {
+                left: 10px;
+                bottom: 66px;
+                width: 220px;
+            }
+
+            .message-form {
+                padding: 5px 6px 5px 8px;
+            }
+
+            .message-form input[type="text"] {
+                height: 42px;
+            }
+
+            .message-form button {
+                width: 40px;
+                height: 40px;
+            }
         }
 
     </style>
@@ -660,6 +983,15 @@
         </div>
 
 
+        <!-- IMAGE SEARCH RESULTS -->
+
+        <div
+            id="image-results"
+            class="image-results"
+        >
+        </div>
+
+
         <!-- IMAGE PREVIEW -->
 
         <div
@@ -674,91 +1006,105 @@
         </div>
 
 
-        <!-- DOCUMENT UPLOAD -->
-
-        <div class="upload-section">
-
+        <!-- HIDDEN DOCUMENT UPLOAD -->
+        <div class="hidden-document-upload">
             <form
                 method="POST"
                 enctype="multipart/form-data"
                 class="upload-form"
+                id="document-upload-form"
             >
-
                 {% csrf_token %}
-
                 <input
                     type="file"
                     name="document"
+                    id="document-input"
                     accept=".pdf,.txt,.docx"
-                    required
                 >
-
-                <button
-                    type="submit"
-                    class="upload-button"
-                >
-                    📄 Upload Document
+                <button type="submit" id="document-submit-button">
+                    Upload
                 </button>
-
             </form>
-
         </div>
 
 
-        <!-- MESSAGE FORM -->
+        <!-- CHATGPT-STYLE MESSAGE COMPOSER -->
+        <div class="composer-wrap">
 
-        <form
-            method="POST"
-            enctype="multipart/form-data"
-            class="message-form"
-            id="message-form"
-        >
+            <!-- PLUS MENU -->
+            <div class="composer-menu" id="composer-menu">
 
-            {% csrf_token %}
+                <button type="button" onclick="chooseImage()">
+                    🖼️ Upload image
+                </button>
 
-            <button
-                type="button"
-                class="camera-button"
-                onclick="openCamera()"
-                title="Take a photo"
+                <button type="button" onclick="takePhoto()">
+                    📷 Take photo
+                </button>
+
+                <button type="button" onclick="startVoiceInput(); closeComposerMenu()">
+                    🎤 Voice input
+                </button>
+
+                <button type="button" onclick="searchImages(); closeComposerMenu()">
+                    🔍 Search images
+                </button>
+
+                <button type="button" onclick="chooseDocument()">
+                    📄 Upload document
+                </button>
+
+            </div>
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+                class="message-form"
+                id="message-form"
             >
-                📷
-            </button>
+                {% csrf_token %}
 
-            <button
-                type="button"
-                class="voice-button"
-                onclick="startVoiceInput()"
-                title="Voice input"
-                id="voice-button"
-            >
-                🎤
-            </button>
+                <!-- PLUS -->
+                <button
+                    type="button"
+                    class="plus-button"
+                    onclick="toggleComposerMenu()"
+                    title="Add"
+                    id="plus-button"
+                >
+                    +
+                </button>
 
-            <input
-                type="file"
-                name="image"
-                id="image-input"
-                accept="image/*"
-                capture="environment"
-                hidden
-            >
+                <!-- HIDDEN IMAGE INPUT -->
+                <input
+                    type="file"
+                    name="image"
+                    id="image-input"
+                    accept="image/*"
+                    capture="environment"
+                    hidden
+                >
 
-            <input
-                type="text"
-                name="message"
-                id="message-input"
-                placeholder="Message ChatGPT..."
-            >
+                <!-- TEXT INPUT -->
+                <input
+                    type="text"
+                    name="message"
+                    id="message-input"
+                    placeholder="Message ChatGPT..."
+                    autocomplete="off"
+                >
 
-            <button
-                type="submit"
-                class="send-button"
-            >
-                ➤
-            </button>
+                <!-- SEND -->
+                <button
+                    type="submit"
+                    class="send-button"
+                    title="Send"
+                >
+                    ➤
+                </button>
 
-        </form>
+            </form>
+        </div>
 
     </div>
 
@@ -766,6 +1112,90 @@
 
 
 <script>
+
+
+
+/* =========================
+   PLUS MENU
+========================= */
+
+function toggleComposerMenu() {
+    const menu = document.getElementById("composer-menu");
+
+    if (!menu) {
+        return;
+    }
+
+    menu.classList.toggle("show");
+}
+
+function closeComposerMenu() {
+    const menu = document.getElementById("composer-menu");
+
+    if (menu) {
+        menu.classList.remove("show");
+    }
+}
+
+function chooseImage() {
+    closeComposerMenu();
+
+    const input = document.getElementById("image-input");
+
+    if (input) {
+        input.removeAttribute("capture");
+        input.click();
+    }
+}
+
+function takePhoto() {
+    closeComposerMenu();
+
+    const input = document.getElementById("image-input");
+
+    if (input) {
+        input.setAttribute("capture", "environment");
+        input.click();
+    }
+}
+
+function chooseDocument() {
+    closeComposerMenu();
+
+    const input = document.getElementById("document-input");
+
+    if (input) {
+        input.click();
+    }
+}
+
+/* Close the + menu when clicking elsewhere */
+document.addEventListener("click", function (event) {
+    const menu = document.getElementById("composer-menu");
+    const plusButton = document.getElementById("plus-button");
+
+    if (!menu || !plusButton) {
+        return;
+    }
+
+    if (
+        !menu.contains(event.target) &&
+        !plusButton.contains(event.target)
+    ) {
+        menu.classList.remove("show");
+    }
+});
+
+/* Automatically submit a selected document */
+const documentInput = document.getElementById("document-input");
+
+if (documentInput) {
+    documentInput.addEventListener("change", function () {
+        if (this.files.length > 0) {
+            document.getElementById("document-upload-form").submit();
+        }
+    });
+}
 
 
 /* =========================
@@ -801,7 +1231,10 @@ function toggleTheme() {
    RENAME CHAT
 ========================= */
 
-function renameChat(event, chatId) {
+function renameChat(
+    event,
+    chatId
+) {
 
     event.preventDefault();
 
@@ -818,7 +1251,9 @@ function renameChat(event, chatId) {
     form.method = "POST";
 
     form.action =
-        "/rename-chat/" + chatId + "/";
+        "/rename-chat/" +
+        chatId +
+        "/";
 
     const csrf =
         document.createElement("input");
@@ -865,21 +1300,30 @@ document
         "change",
         function () {
 
-            if (this.files.length === 0) {
+            if (
+                this.files.length === 0
+            ) {
                 return;
             }
 
             document
-                .getElementById("image-preview")
+                .getElementById(
+                    "image-preview"
+                )
                 .style.display = "block";
 
             document
-                .getElementById("image-name")
+                .getElementById(
+                    "image-name"
+                )
                 .textContent =
-                    "📷 " + this.files[0].name;
+                    "📷 " +
+                    this.files[0].name;
 
             document
-                .getElementById("message-input")
+                .getElementById(
+                    "message-input"
+                )
                 .value =
                     "Please analyze this image.";
         }
@@ -908,15 +1352,26 @@ function startVoiceInput() {
     const recognition =
         new SpeechRecognition();
 
-    recognition.lang = "en-IN";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.lang =
+        "en-IN";
+
+    recognition.continuous =
+        false;
+
+    recognition.interimResults =
+        false;
 
     const voiceButton =
-        document.getElementById("voice-button");
+        document.getElementById(
+            "voice-button"
+        );
 
-    voiceButton.classList.add("listening");
-    voiceButton.innerHTML = "🔴";
+    voiceButton.classList.add(
+        "listening"
+    );
+
+    voiceButton.innerHTML =
+        "🔴";
 
     recognition.start();
 
@@ -924,11 +1379,15 @@ function startVoiceInput() {
         function (event) {
 
             const transcript =
-                event.results[0][0].transcript;
+                event.results[0][0]
+                    .transcript;
 
             document
-                .getElementById("message-input")
-                .value = transcript;
+                .getElementById(
+                    "message-input"
+                )
+                .value =
+                    transcript;
         };
 
     recognition.onerror =
@@ -946,7 +1405,8 @@ function startVoiceInput() {
                 "listening"
             );
 
-            voiceButton.innerHTML = "🎤";
+            voiceButton.innerHTML =
+                "🎤";
         };
 }
 
@@ -957,7 +1417,9 @@ function startVoiceInput() {
 
 function speakAIResponse(button) {
 
-    if (!("speechSynthesis" in window)) {
+    if (
+        !("speechSynthesis" in window)
+    ) {
 
         alert(
             "Voice playback is not supported in this browser."
@@ -967,7 +1429,9 @@ function speakAIResponse(button) {
     }
 
     const assistantMessage =
-        button.closest(".assistant-message");
+        button.closest(
+            ".assistant-message"
+        );
 
     if (!assistantMessage) {
 
@@ -983,7 +1447,9 @@ function speakAIResponse(button) {
 
     if (!content) {
 
-        alert("AI response text not found.");
+        alert(
+            "AI response text not found."
+        );
 
         return;
     }
@@ -993,7 +1459,9 @@ function speakAIResponse(button) {
 
     if (!text) {
 
-        alert("There is no AI text to read.");
+        alert(
+            "There is no AI text to read."
+        );
 
         return;
     }
@@ -1001,66 +1469,63 @@ function speakAIResponse(button) {
     window.speechSynthesis.cancel();
 
     const utterance =
-        new SpeechSynthesisUtterance(text);
+        new SpeechSynthesisUtterance(
+            text
+        );
 
-    utterance.lang = "en-IN";
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
+    utterance.lang =
+        "en-IN";
+
+    utterance.rate =
+        0.95;
+
+    utterance.pitch =
+        1;
 
     const voices =
-        window.speechSynthesis.getVoices();
+        window.speechSynthesis
+            .getVoices();
 
     const preferredVoice =
         voices.find(
             function (voice) {
-                return voice.lang === "en-IN";
+
+                return (
+                    voice.lang ===
+                    "en-IN"
+                );
             }
         ) ||
         voices.find(
             function (voice) {
-                return voice.lang.startsWith("en");
+
+                return voice.lang
+                    .startsWith("en");
             }
         );
 
     if (preferredVoice) {
-        utterance.voice = preferredVoice;
+
+        utterance.voice =
+            preferredVoice;
     }
 
-    button.classList.add("playing");
-    button.textContent = "⏹ Stop";
+    button.classList.add(
+        "playing"
+    );
 
-    let stopped = false;
-
-    button.onclick = function () {
-
-        stopped = true;
-
-        window.speechSynthesis.cancel();
-
-        button.classList.remove("playing");
-        button.textContent = "🔊 Listen";
-
-        button.onclick = function () {
-            speakAIResponse(button);
-        };
-    };
+    button.textContent =
+        "⏹ Stop";
 
     utterance.onend =
         function () {
 
-            if (!stopped) {
+            button.classList.remove(
+                "playing"
+            );
 
-                button.classList.remove(
-                    "playing"
-                );
-
-                button.textContent =
-                    "🔊 Listen";
-
-                button.onclick = function () {
-                    speakAIResponse(button);
-                };
-            }
+            button.textContent =
+                "🔊 Listen";
         };
 
     utterance.onerror =
@@ -1073,10 +1538,6 @@ function speakAIResponse(button) {
             button.textContent =
                 "🔊 Listen";
 
-            button.onclick = function () {
-                speakAIResponse(button);
-            };
-
             alert(
                 "The browser could not play the AI response."
             );
@@ -1085,6 +1546,7 @@ function speakAIResponse(button) {
     window.speechSynthesis.speak(
         utterance
     );
+
 }
 
 
@@ -1115,6 +1577,126 @@ document.addEventListener(
         );
     }
 );
+
+
+/* =========================
+   IMAGE SEARCH
+========================= */
+
+function searchImages() {
+
+    const input =
+        document.getElementById(
+            "message-input"
+        );
+
+    const query =
+        input.value.trim();
+
+    if (!query) {
+
+        alert(
+            "Type what image you want to search for."
+        );
+
+        return;
+    }
+
+    const results =
+        document.getElementById(
+            "image-results"
+        );
+
+    results.style.display =
+        "block";
+
+    results.innerHTML =
+        "<p>Searching for images...</p>";
+
+    fetch(
+        "/image-search/?q=" +
+        encodeURIComponent(query)
+    )
+        .then(
+            function (response) {
+
+                return response.json();
+            }
+        )
+        .then(
+            function (data) {
+
+                if (data.error) {
+
+                    results.innerHTML =
+                        "<p>" +
+                        data.error +
+                        "</p>";
+
+                    return;
+                }
+
+                if (
+                    !data.images ||
+                    data.images.length === 0
+                ) {
+
+                    results.innerHTML =
+                        "<p>No images found.</p>";
+
+                    return;
+                }
+
+                let html =
+                    '<div class="image-results-grid">';
+
+                data.images.forEach(
+                    function (image) {
+
+                        html += `
+                            <div class="image-card">
+
+                                <a
+                                    href="${image.page}"
+                                    target="_blank"
+                                >
+                                    <img
+                                        src="${image.image}"
+                                        alt="${image.alt}"
+                                    >
+                                </a>
+
+                                <div>
+                                    Photo by
+                                    <a
+                                        href="${image.photographer_url}"
+                                        target="_blank"
+                                    >
+                                        ${image.photographer}
+                                    </a>
+                                    on Pexels
+                                </div>
+
+                            </div>
+                        `;
+                    }
+                );
+
+                html +=
+                    "</div>";
+
+                results.innerHTML =
+                    html;
+            }
+        )
+        .catch(
+            function () {
+
+                results.innerHTML =
+                    "<p>Could not search for images.</p>";
+            }
+        );
+}
 
 </script>
 

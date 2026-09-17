@@ -11,6 +11,11 @@ urlpatterns = [
         "admin/",
         admin.site.urls
     ),
+    path(
+    "image-search/",
+    views.image_search,
+    name="image_search",
+),
 
     # Authentication
     path(

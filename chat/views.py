@@ -5,10 +5,12 @@ import io
 import os
 import re
 
+import requests
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from openai import OpenAI
 from PIL import Image
@@ -32,35 +34,22 @@ def clean_ai_response(text):
     if not text:
         return ""
 
-    # Remove fenced code blocks.
-    text = re.sub(r"```(?:python|text|html|css|javascript)?", "", text)
-    text = text.replace("```", "")
+    replacements = [
+        ("**", ""),
+        ("###", ""),
+        ("##", ""),
+        ("```python", ""),
+        ("```", ""),
+    ]
 
-    # Remove bold and italic markers while keeping the text.
-    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text, flags=re.DOTALL)
-    text = re.sub(r"__(.*?)__", r"\1", text, flags=re.DOTALL)
+    for old_text, new_text in replacements:
+        text = text.replace(old_text, new_text)
 
-    # Remove remaining single asterisks used for italic formatting.
-    text = re.sub(r"(?<!\w)\*(.*?)\*(?!\w)", r"\1", text, flags=re.DOTALL)
-
-    # Remove Markdown headings.
     text = re.sub(
-        r"^\s*#{1,6}\s*",
-        "",
-        text,
-        flags=re.MULTILINE
+        r"\n{3,}",
+        "\n\n",
+        text
     )
-
-    # Remove horizontal rules.
-    text = re.sub(
-        r"^\s*([-*_]){3,}\s*$",
-        "",
-        text,
-        flags=re.MULTILINE
-    )
-
-    # Clean excessive blank lines.
-    text = re.sub(r"\n{3,}", "\n\n", text)
 
     return text.strip()
 
@@ -310,6 +299,128 @@ def handle_message(
     return "SUCCESS"
 
 
+# =========================================================
+# NEW: IMAGE SEARCH
+# =========================================================
+
+@login_required
+def image_search(request):
+    """Search Pexels for reference images."""
+    query = request.GET.get(
+        "q",
+        ""
+    ).strip()
+
+    if not query:
+        return JsonResponse(
+            {
+                "error": (
+                    "Please provide an image "
+                    "search query."
+                )
+            },
+            status=400
+        )
+
+    api_key = os.getenv(
+        "PEXELS_API_KEY"
+    )
+
+    if not api_key:
+        return JsonResponse(
+            {
+                "error": (
+                    "PEXELS_API_KEY is not configured."
+                )
+            },
+            status=500
+        )
+
+    try:
+        response = requests.get(
+            "https://api.pexels.com/v1/search",
+            headers={
+                "Authorization": api_key
+            },
+            params={
+                "query": query,
+                "per_page": 6,
+                "locale": "en-US"
+            },
+            timeout=15
+        )
+
+    except requests.RequestException:
+        return JsonResponse(
+            {
+                "error": (
+                    "Unable to connect to "
+                    "the image search service."
+                )
+            },
+            status=503
+        )
+
+    if response.status_code != 200:
+        return JsonResponse(
+            {
+                "error": "Image search failed."
+            },
+            status=response.status_code
+        )
+
+    data = response.json()
+
+    images = []
+
+    for photo in data.get(
+        "photos",
+        []
+    ):
+
+        images.append(
+            {
+                "id": photo.get("id"),
+                "image": photo.get(
+                    "src",
+                    {}
+                ).get(
+                    "medium"
+                ),
+                "small": photo.get(
+                    "src",
+                    {}
+                ).get(
+                    "small"
+                ),
+                "page": photo.get(
+                    "url"
+                ),
+                "photographer": photo.get(
+                    "photographer"
+                ),
+                "photographer_url": photo.get(
+                    "photographer_url"
+                ),
+                "alt": (
+                    photo.get("alt")
+                    or query
+                ),
+            }
+        )
+
+    return JsonResponse(
+        {
+            "query": query,
+            "images": images
+        }
+    )
+
+
+# =========================================================
+# AUTHENTICATION
+# =========================================================
+
 def signup(request):
     """Create a new user account."""
     if request.method == "POST":
@@ -354,6 +465,10 @@ def login_view(request):
         {"form": form}
     )
 
+
+# =========================================================
+# CHAT HOME
+# =========================================================
 
 @login_required
 def chat_home(request):
@@ -431,6 +546,10 @@ def chat_home(request):
     )
 
 
+# =========================================================
+# NEW CHAT
+# =========================================================
+
 @login_required
 def new_chat(request):
     """Create a new conversation."""
@@ -455,6 +574,10 @@ def new_chat(request):
         conversation_id=conversation.id
     )
 
+
+# =========================================================
+# OPEN CHAT
+# =========================================================
 
 @login_required
 def open_chat(request, conversation_id):
@@ -528,6 +651,10 @@ def open_chat(request, conversation_id):
     )
 
 
+# =========================================================
+# DELETE CHAT
+# =========================================================
+
 @login_required
 def delete_chat(request, conversation_id):
     """Delete a conversation."""
@@ -542,6 +669,10 @@ def delete_chat(request, conversation_id):
     return redirect("chat_home")
 
 
+# =========================================================
+# RENAME CHAT
+# =========================================================
+
 @login_required
 def rename_chat(request, conversation_id):
     """Rename a conversation."""
@@ -552,7 +683,10 @@ def rename_chat(request, conversation_id):
     )
 
     if request.method == "POST":
-        new_title = request.POST.get("title")
+
+        new_title = request.POST.get(
+            "title"
+        )
 
         if new_title:
             conversation.title = new_title
@@ -564,12 +698,20 @@ def rename_chat(request, conversation_id):
     )
 
 
+# =========================================================
+# LOGOUT
+# =========================================================
+
 def logout_view(request):
     """Log the user out."""
     logout(request)
 
     return redirect("login")
 
+
+# =========================================================
+# LIBRARY
+# =========================================================
 
 @login_required
 def library(request):
@@ -605,6 +747,10 @@ def library(request):
     )
 
 
+# =========================================================
+# DELETE DOCUMENT
+# =========================================================
+
 @login_required
 def delete_document(request, document_id):
     """Delete a document and its vector data."""
@@ -630,6 +776,10 @@ def delete_document(request, document_id):
     return redirect("library")
 
 
+# =========================================================
+# PROJECTS
+# =========================================================
+
 @login_required
 def projects(request):
     """Display the user's projects and their chats."""
@@ -642,7 +792,10 @@ def projects(request):
     )
 
     if request.method == "POST":
-        project_name = request.POST.get("name")
+
+        project_name = request.POST.get(
+            "name"
+        )
 
         if project_name:
             Project.objects.create(
@@ -655,9 +808,15 @@ def projects(request):
     return render(
         request,
         "chat/projects.html",
-        {"projects": projects_list}
+        {
+            "projects": projects_list
+        }
     )
 
+
+# =========================================================
+# DELETE PROJECT
+# =========================================================
 
 @login_required
 def delete_project(request, project_id):
@@ -673,6 +832,10 @@ def delete_project(request, project_id):
     return redirect("projects")
 
 
+# =========================================================
+# PROJECT DOCUMENT UPLOAD
+# =========================================================
+
 @login_required
 def upload_project_document(
     request,
@@ -686,11 +849,13 @@ def upload_project_document(
     )
 
     if request.method == "POST":
+
         uploaded_file = request.FILES.get(
             "document"
         )
 
         if uploaded_file:
+
             document = Document.objects.create(
                 user=request.user,
                 project=project,
